@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as Obniz from 'obniz';
 import Keyestudio_Buzzer from 'obniz/dist/src/parts/Keyestudio/Keyestudio_Buzzer';
 import Keyestudio_PIR from 'obniz/dist/src/parts/Keyestudio/Keyestudio_PIR';
@@ -11,8 +12,8 @@ export class ObnizService {
   pirSensor: Keyestudio_PIR;
   buzzer: Keyestudio_Buzzer;
 
-  constructor() {
-    this.obniz = new Obniz('5822-0652');
+  constructor(private configService: ConfigService) {
+    this.obniz = new Obniz(this.configService.get('OBNIZ_ID'));
 
     this.obniz.onopen = async () => {
       console.log('obniz is ready');
