@@ -7,12 +7,16 @@ import Keyestudio_TemperatureSensor from 'obniz/dist/src/parts/Keyestudio/Keyest
 
 @Injectable()
 export class ObnizService {
-  obniz: Obniz;
-  tempSensor: Keyestudio_TemperatureSensor;
-  pirSensor: Keyestudio_PIR;
-  buzzer: Keyestudio_Buzzer;
+  obniz?: Obniz;
+  tempSensor?: Keyestudio_TemperatureSensor;
+  pirSensor?: Keyestudio_PIR;
+  buzzer?: Keyestudio_Buzzer;
 
-  constructor(private configService: ConfigService) {
+  constructor(private configService: ConfigService) {}
+
+  start() {
+    if (this.obniz) return;
+
     this.obniz = new Obniz(this.configService.get('OBNIZ_ID'));
 
     this.obniz.onopen = async () => {
@@ -41,21 +45,74 @@ export class ObnizService {
         gnd: 11,
       });
 
-      this.pirSensor.onchange = (value) => {
-        if (value) {
-          console.log('Movement detected');
-          this.obniz.display.clear();
-          this.obniz.display.print('Something is moving!');
-        } else {
-          console.log('no movement detected');
-          this.obniz.display.clear();
-          this.obniz.display.print('No movement detected!');
-        }
-      };
-
       this.obniz.onclose = () => {
         console.log('obniz is closed');
       };
+    };
+  }
+
+  get status(): string {
+    if (!this.obniz) {
+      return 'closed';
+    }
+
+    return this.obniz.connectionState;
+  }
+
+  async getTemperature(): Promise<number> {
+    if (!this.tempSensor) {
+      return 0;
+    }
+
+    const currentTemp = await this.tempSensor.getWait();
+
+    return currentTemp;
+  }
+
+  async buzz() {
+    if (!this.buzzer) {
+      return;
+    }
+
+    this.buzzer.play(100);
+    await this.obniz.wait(1000);
+    this.buzzer.stop();
+  }
+
+  get pirStatus(): 'enabled' | 'disabled' {
+    if (!this.pirSensor) {
+      return 'disabled';
+    }
+
+    return this.pirSensor.onchange ? 'enabled' : 'disabled';
+  }
+
+  disablePir() {
+    if (!this.pirSensor || !this.obniz) {
+      return;
+    }
+
+    this.obniz.display.clear();
+    this.pirSensor.onchange = undefined;
+  }
+
+  enablePir() {
+    if (!this.pirSensor || !this.obniz) {
+      return;
+    }
+
+    this.pirSensor.onchange = (value) => {
+      if (value) {
+        console.log('Movement detected');
+        this.obniz.display.clear();
+        this.obniz.display.print('Something is moving!');
+        // TODO: Add API call to line to send a message
+      } else {
+        console.log('no movement detected');
+        this.obniz.display.clear();
+        this.obniz.display.print('No movement detected!');
+        // TODO: Add API call to line to send a message
+      }
     };
   }
 }

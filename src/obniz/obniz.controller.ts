@@ -5,41 +5,56 @@ import { ObnizService } from './obniz.service';
 export class ObnizController {
   constructor(private readonly obnizService: ObnizService) {}
 
-  @Get()
+  @Get('/status')
   getStatus() {
     return {
       ok: true,
-      status: this.obnizService.obniz.connectionState,
+      status: this.obnizService.status,
     };
   }
 
   @Get('temperature')
   async getTemperature() {
-    const currentTemp = await this.obnizService.tempSensor.getWait();
+    const currentTemp = await this.obnizService.getTemperature();
 
     return {
       ok: true,
-      temprature: currentTemp.toFixed(1),
+      temperature: currentTemp.toFixed(1),
     };
   }
 
   @Post('buzz')
-  async buzzBuzzer() {
-    this.obnizService.buzzer.play(100);
-    await this.obnizService.obniz.wait(1000);
-    this.obnizService.buzzer.stop();
-    return {
-      ok: true,
-    };
+  async buzz() {
+    try {
+      this.obnizService.buzz();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 
   @Post('pir.disable')
-  dsiablePir() {
-    this.obnizService.obniz.display.clear();
-    this.obnizService.pirSensor.onchange = undefined;
-    return {
-      ok: true,
-    };
+  disablePir() {
+    try {
+      this.obnizService.disablePir();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 
   @Post('pir.enable')
