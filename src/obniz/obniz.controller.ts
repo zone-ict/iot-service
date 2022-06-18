@@ -5,22 +5,142 @@ import { ObnizService } from './obniz.service';
 export class ObnizController {
   constructor(private readonly obnizService: ObnizService) {}
 
-  @Get('/status')
+  @Post('send.test-message')
+  sendTestMessage() {
+    try {
+      this.obnizService.sendTestMessage();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Get('status')
   getStatus() {
-    return {
-      ok: true,
-      status: this.obnizService.status,
-    };
+    try {
+      return {
+        ok: true,
+        status: this.obnizService.status,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Post('start')
+  startObniz() {
+    try {
+      this.obnizService.start();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Post('stop')
+  async stopObniz() {
+    try {
+      await this.obnizService.stop();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 
   @Get('temperature')
   async getTemperature() {
-    const currentTemp = await this.obnizService.getTemperature();
+    try {
+      const currentTemp = await this.obnizService.getTemperature();
 
-    return {
-      ok: true,
-      temperature: currentTemp.toFixed(1),
-    };
+      return {
+        ok: true,
+        temperature: currentTemp.toFixed(1),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Get('temperature/monitor.status')
+  async getIsTempMonitoring() {
+    try {
+      return {
+        ok: true,
+        status: this.obnizService.currentMonitoringStatus,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Post('temperature/monitor.start')
+  async startTempMonitoring() {
+    try {
+      this.obnizService.startTempMonitoring();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Post('temperature/monitor.stop')
+  async stopTempMonitoring() {
+    try {
+      this.obnizService.stopTempMonitoring();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 
   @Post('buzz')
@@ -40,7 +160,24 @@ export class ObnizController {
     }
   }
 
-  @Post('pir.disable')
+  @Get('pir/monitor.status')
+  getIsPirMonitoring() {
+    try {
+      return {
+        ok: true,
+        status: this.obnizService.currentMonitoringStatus,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
+  }
+
+  @Post('pir/monitor.stop')
   disablePir() {
     try {
       this.obnizService.disablePir();
@@ -57,19 +194,18 @@ export class ObnizController {
     }
   }
 
-  @Post('pir.enable')
+  @Post('pir/monitor.start')
   enablePir() {
-    this.obnizService.pirSensor.onchange = (value) => {
-      if (value) {
-        console.log('Movement detected');
-        this.obnizService.obniz.display.clear();
-        this.obnizService.obniz.display.print('Something is moving!');
-      } else {
-        console.log('no movement detected');
-        this.obnizService.obniz.display.clear();
-        this.obnizService.obniz.display.print('No movement detected!');
-      }
-    };
-    return { ok: true };
+    try {
+      this.obnizService.enablePir();
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 }
