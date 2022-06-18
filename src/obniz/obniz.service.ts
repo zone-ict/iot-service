@@ -243,6 +243,7 @@ export class ObnizService {
 
     this.obniz.display.clear();
     this.pirSensor.onchange = undefined;
+    this.isPIRMonitoring = false;
   }
 
   enablePir() {
@@ -273,6 +274,8 @@ export class ObnizService {
         // TODO: Add API call to line to send a message
       }
     };
+
+    this.isPIRMonitoring = true;
 
     console.log('PIR sensor enabled!');
   }
