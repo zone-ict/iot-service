@@ -244,6 +244,11 @@ export class ObnizService {
     this.obniz.display.clear();
     this.pirSensor.onchange = undefined;
     this.isPIRMonitoring = false;
+
+    request(
+      LINE_NOTIFY_URL,
+      generateOptionsWithMessage('Security sensor turned off!'),
+    );
   }
 
   enablePir() {
@@ -276,6 +281,11 @@ export class ObnizService {
     };
 
     this.isPIRMonitoring = true;
+
+    request(
+      LINE_NOTIFY_URL,
+      generateOptionsWithMessage('Security sensor turned on!'),
+    );
 
     console.log('PIR sensor enabled!');
   }
